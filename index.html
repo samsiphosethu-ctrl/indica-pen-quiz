@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find Your Indica Vibe</title>
+<style>
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: #ffffff;
+  -webkit-font-smoothing: antialiased;
+}
+ 
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+ 
+:root {
+  --green: #1B3A2F;
+  --green-mid: #2D5A45;
+  --green-light: #4A7C59;
+  --cream: #F7F5F0;
+  --sage: #DDE8E2;
+  --pink: #F2E8E5;
+  --lavender: #E8E5F2;
+  --text: #1a1a1a;
+  --muted: #6b7b72;
+  --radius: 14px;
+}
+ 
+#quiz-wrap {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 32px 20px 40px;
+}
+ 
+/* Header */
+.quiz-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+ 
+.quiz-eyebrow {
+  display: inline-block;
+  background: var(--sage);
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 5px 14px;
+  border-radius: 999px;
+  margin-bottom: 14px;
+}
+ 
+.quiz-title {
+  font-size: clamp(1.3rem, 4vw, 1.65rem);
+  font-weight: 700;
+  color: var(--green);
+  line-height: 1.25;
+  margin: 0 0 8px;
+}
+ 
+.quiz-sub {
+  font-size: 0.95rem;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.5;
+}
+ 
+/* Progress dots */
+.progress-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 28px;
+}
+ 
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #D8E4DE;
+  transition: all 0.3s ease;
+}
+ 
+.dot.active {
+  background: var(--green);
+  width: 24px;
+}
+ 
+.dot.done {
+  background: var(--green-light);
+}
+ 
+/* Screen transitions */
+.screen {
+  display: none;
+  animation: fadeUp 0.35s ease forwards;
+}
+ 
+.screen.active {
+  display: block;
+}
+ 
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+ 
+/* Question */
+.question-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-align: center;
+  margin-bottom: 10px;
+}
+ 
+.question-text {
+  font-size: clamp(1.05rem, 3.5vw, 1.25rem);
+  font-weight: 700;
+  color: var(--text);
+  text-align: center;
+  margin: 0 0 24px;
+  line-height: 1.35;
+}
+ 
+/* Option cards */
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+ 
+.option-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--cream);
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+}
+ 
+.option-card:hover {
+  border-color: var(--green-light);
+  background: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(27,58,47,0.1);
+}
+ 
+.option-card:active {
+  transform: translateY(0);
+}
+ 
+.option-card.selected {
+  border-color: var(--green);
+  background: #fff;
+  box-shadow: 0 4px 20px rgba(27,58,47,0.12);
+}
+ 
+.option-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #fff;
+}
+ 
+.option-card[data-color="sage"] .option-icon { background: var(--sage); }
+.option-card[data-color="pink"] .option-icon { background: var(--pink); }
+.option-card[data-color="lavender"] .option-icon { background: var(--lavender); }
+ 
+.option-text-wrap {
+  flex: 1;
+}
+ 
+.option-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 3px;
+  line-height: 1.2;
+}
+ 
+.option-desc {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.4;
+}
+ 
+.option-arrow {
+  font-size: 1rem;
+  color: #C4D4CA;
+  flex-shrink: 0;
+  transition: color 0.2s, transform 0.2s;
+}
+ 
+.option-card:hover .option-arrow,
+.option-card.selected .option-arrow {
+  color: var(--green);
+  transform: translateX(3px);
+}
+ 
+/* Result screen */
+.result-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  background: var(--sage);
+  border-radius: 16px;
+  font-size: 2rem;
+  margin: 0 auto 20px;
+}
+ 
+.result-eyebrow {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--green-light);
+  margin-bottom: 8px;
+}
+ 
+.result-headline {
+  font-size: clamp(1.2rem, 4vw, 1.5rem);
+  font-weight: 700;
+  color: var(--green);
+  text-align: center;
+  margin: 0 0 8px;
+  line-height: 1.25;
+}
+ 
+.result-sub {
+  font-size: 0.92rem;
+  color: var(--muted);
+  text-align: center;
+  margin: 0 0 28px;
+  line-height: 1.5;
+}
+ 
+.result-card {
+  background: var(--cream);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+ 
+.result-card-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+ 
+.result-dot {
+  width: 10px;
+  height: 10px;
+  background: var(--green);
+  border-radius: 999px;
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+ 
+.result-fact {
+  font-size: 0.88rem;
+  color: var(--text);
+  margin: 0;
+  line-height: 1.5;
+}
+ 
+.result-fact strong {
+  color: var(--green);
+  font-weight: 700;
+}
+ 
+.cta-btn {
+  display: block;
+  width: 100%;
+  background: var(--green);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  padding: 15px 24px;
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  letter-spacing: 0.01em;
+}
+ 
+.cta-btn:hover {
+  background: var(--green-mid);
+  transform: translateY(-1px);
+}
+ 
+.cta-btn:active {
+  transform: translateY(0);
+}
+ 
+.restart-btn {
+  display: block;
+  width: 100%;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-align: center;
+  padding: 12px;
+  border: none;
+  cursor: pointer;
+  margin-top: 8px;
+  border-radius: var(--radius);
+  transition: color 0.2s, background 0.2s;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+}
+ 
+.restart-btn:hover {
+  color: var(--green);
+  text-decoration-color: var(--green);
+}
+</style>
+</head>
+<body>
+ 
+<div id="quiz-wrap">
+ 
+  <div class="quiz-header">
+    <span class="quiz-eyebrow">Quick Quiz</span>
+    <h2 class="quiz-title">Find your indica vibe</h2>
+    <p class="quiz-sub">Two questions. One recommendation.</p>
+  </div>
+ 
+  <div class="progress-dots" id="progress-dots">
+    <div class="dot active" id="dot-0"></div>
+    <div class="dot" id="dot-1"></div>
+    <div class="dot" id="dot-result"></div>
+  </div>
+ 
+  <!-- Q1 -->
+  <div class="screen active" id="screen-0">
+    <p class="question-label">Question 1 of 2</p>
+    <h3 class="question-text">How do you want to spend tonight?</h3>
+    <div class="options">
+      <button class="option-card" data-color="sage" onclick="answer(0, 'deep')">
+        <div class="option-icon">🌙</div>
+        <div class="option-text-wrap">
+          <p class="option-title">Full unwind</p>
+          <p class="option-desc">Couch, calm, completely off the clock</p>
+        </div>
+        <span class="option-arrow">›</span>
+      </button>
+      <button class="option-card" data-color="lavender" onclick="answer(0, 'easy')">
+        <div class="option-icon">🍃</div>
+        <div class="option-text-wrap">
+          <p class="option-title">Easy and mellow</p>
+          <p class="option-desc">Relaxed, but still present for the evening</p>
+        </div>
+        <span class="option-arrow">›</span>
+      </button>
+    </div>
+  </div>
+ 
+  <!-- Q2 -->
+  <div class="screen" id="screen-1">
+    <p class="question-label">Question 2 of 2</p>
+    <h3 class="question-text">How familiar are you with cannabis vapes?</h3>
+    <div class="options">
+      <button class="option-card" data-color="sage" onclick="answer(1, 'experienced')">
+        <div class="option-icon">✌️</div>
+        <div class="option-text-wrap">
+          <p class="option-title">Been a while or I'm comfortable</p>
+          <p class="option-desc">I know roughly what to expect</p>
+        </div>
+        <span class="option-arrow">›</span>
+      </button>
+      <button class="option-card" data-color="pink" onclick="answer(1, 'new')">
+        <div class="option-icon">👋</div>
+        <div class="option-text-wrap">
+          <p class="option-title">Pretty new to it</p>
+          <p class="option-desc">Looking to ease into the experience</p>
+        </div>
+        <span class="option-arrow">›</span>
+      </button>
+    </div>
+  </div>
+ 
+  <!-- Result -->
+  <div class="screen" id="screen-result">
+    <div id="result-content"></div>
+  </div>
+ 
+</div>
+ 
+<script>
+(function () {
+  var answers = {};
+ 
+  var results = {
+    afghani: {
+      icon: '🌿',
+      eyebrow: 'Your match',
+      headline: 'Purple Afghani THCa Disposable Vape',
+      sub: 'A myrcene-forward live resin pen with an earthy blackberry-pine flavor and a 45% THCa / 21% CBD profile — made for a full, unhurried evening.',
+      facts: [
+        '<strong>1g live resin</strong> — ceramic atomizer, draw-activated',
+        '<strong>45% THCa + 21% CBD</strong> — a well-rounded profile',
+        '<strong>675 reviews</strong> at 4.49 out of 5',
+        '<strong>$40</strong> — ships to 24 states'
+      ],
+      url: 'https://mood.com/product/thca-purple-afghani-disposable-vape/dose-1g',
+      cta: 'Shop Purple Afghani — 1g for $40',
+      notice: 'For adults 21+. Not for first-time users.'
+    },
+    delta8: {
+      icon: '🌱',
+      eyebrow: 'Your match',
+      headline: 'Hero Dose Delta-8 Original Z',
+      sub: 'A smooth, easygoing Delta-8 pen that keeps things light. Milder and clearer-headed than THCa — a great way to settle into your evening without overdoing it.',
+      facts: [
+        '<strong>1g</strong> — draw-activated, pre-charged',
+        '<strong>Delta-8 THC</strong> — milder, clearer-headed effect',
+        '<strong>615 reviews</strong> at 4.24 out of 5',
+        '<strong>$30</strong> — ships to 28 states'
+      ],
+      url: 'https://mood.com/product/hero-dose-delta-8-thc-the-original-z-disposable-vape',
+      cta: 'Shop Hero Dose Delta-8 — 1g for $30',
+      notice: 'For adults 21+. THCa products may affect drug test results.'
+    }
+  };
+ 
+  window.answer = function (question, value) {
+    answers[question] = value;
+ 
+    var cards = document.querySelectorAll('#screen-' + question + ' .option-card');
+    cards.forEach(function (c) { c.classList.remove('selected'); });
+    event.currentTarget.classList.add('selected');
+ 
+    setTimeout(function () {
+      if (question === 0) {
+        goTo(1);
+      } else {
+        showResult();
+      }
+    }, 260);
+  };
+ 
+  function goTo(screenIndex) {
+    document.querySelectorAll('.screen').forEach(function (s) { s.classList.remove('active'); });
+    document.getElementById('screen-' + screenIndex).classList.add('active');
+    updateDots(screenIndex);
+    sendHeight();
+  }
+ 
+  function showResult() {
+    var vibe = answers[0];
+    var exp  = answers[1];
+    var key  = (vibe === 'deep' && exp === 'experienced') ? 'afghani' : 'delta8';
+    var r    = results[key];
+ 
+    var factsHtml = r.facts.map(function (f) {
+      return '<div class="result-card-row"><div class="result-dot"></div><p class="result-fact">' + f + '</p></div>';
+    }).join('');
+ 
+    document.getElementById('result-content').innerHTML =
+      '<div class="result-badge">' + r.icon + '</div>' +
+      '<p class="result-eyebrow">' + r.eyebrow + '</p>' +
+      '<h3 class="result-headline">' + r.headline + '</h3>' +
+      '<p class="result-sub">' + r.sub + '</p>' +
+      '<div class="result-card">' + factsHtml + '</div>' +
+      '<a class="cta-btn" href="' + r.url + '" target="_blank" rel="noopener">' + r.cta + '</a>' +
+      '<p style="font-size:0.78rem;color:#9aada4;text-align:center;margin:10px 0 4px;line-height:1.4;">' + r.notice + '</p>' +
+      '<button class="restart-btn" onclick="restart()">Start over</button>';
+ 
+    document.querySelectorAll('.screen').forEach(function (s) { s.classList.remove('active'); });
+    document.getElementById('screen-result').classList.add('active');
+    updateDots('result');
+    sendHeight();
+  }
+ 
+  window.restart = function () {
+    answers = {};
+    document.querySelectorAll('.option-card').forEach(function (c) { c.classList.remove('selected'); });
+    goTo(0);
+  };
+ 
+  function updateDots(active) {
+    var dot0 = document.getElementById('dot-0');
+    var dot1 = document.getElementById('dot-1');
+    var dotR = document.getElementById('dot-result');
+    dot0.className = 'dot';
+    dot1.className = 'dot';
+    dotR.className = 'dot';
+    if (active === 0)        { dot0.className = 'dot active'; }
+    else if (active === 1)   { dot0.className = 'dot done'; dot1.className = 'dot active'; }
+    else                     { dot0.className = 'dot done'; dot1.className = 'dot done'; dotR.className = 'dot active'; }
+  }
+ 
+  function sendHeight() {
+    setTimeout(function () {
+      var h = document.getElementById('quiz-wrap').offsetHeight + 8;
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: 'iframeHeight', height: h }, '*');
+      }
+    }, 380);
+  }
+ 
+  // Auto-height on load and resize
+  window.addEventListener('load', sendHeight);
+  window.addEventListener('resize', sendHeight);
+  var ro = new ResizeObserver(function () { sendHeight(); });
+  ro.observe(document.getElementById('quiz-wrap'));
+}());
+</script>
+</body>
+</html>
